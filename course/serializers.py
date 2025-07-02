@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from .models import Subject, Course
+from .models import Subject, Course, Comment
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = '__all__'
 
 class CourseSerializer(serializers.ModelSerializer):
     subject_title = serializers.CharField(source='subject.title', read_only=True)
@@ -8,14 +13,18 @@ class CourseSerializer(serializers.ModelSerializer):
         source='subject',
         write_only=True
     )
+    average_rating = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Course
         fields = [
             'id', 'title', 'overview', 'duration', 'price',
-            'owner', 'image', 'subject_id', 'subject_title', 'created'
+            'owner', 'image', 'subject_id', 'subject_title',
+            'created', 'average_rating'
         ]
         read_only_fields = ['owner', 'created']
+
+
 
 class CourseInlineSerializer(serializers.ModelSerializer):
     class Meta:
