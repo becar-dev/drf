@@ -6,19 +6,7 @@ class SubjectList(generics.ListAPIView):
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
 
-class SubjectDetail(generics.RetrieveAPIView):
-    queryset = Subject.objects.all()
-    serializer_class = SubjectSerializer
-
-class SubjectCreate(generics.CreateAPIView):
-    queryset = Subject.objects.all()
-    serializer_class = SubjectSerializer
-
-class SubjectUpdate(generics.UpdateAPIView):
-    queryset = Subject.objects.all()
-    serializer_class = SubjectSerializer
-
-class SubjectDelete(generics.DestroyAPIView):
+class SubjectDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
 
@@ -27,18 +15,8 @@ class CourseList(generics.ListAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
 
-class CourseDetail(generics.RetrieveAPIView):
+class CourseDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
 
-class CourseCreate(generics.CreateAPIView):
-    queryset = Course.objects.all()
-    serializer_class = CourseSerializer
 
-class CourseUpdate(generics.UpdateAPIView):
-    queryset = Course.objects.all()
-    serializer_class = CourseSerializer
-
-class CourseDelete(generics.DestroyAPIView):
-    queryset = Course.objects.all()
-    serializer_class = CourseSerializer
