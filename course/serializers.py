@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rsa.prime import is_prime
+
 from .models import Subject, Course, Comment
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -20,7 +22,7 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'overview', 'duration', 'price',
             'owner', 'image', 'subject_id', 'subject_title',
-            'created', 'average_rating'
+            'created', 'average_rating', 'is_premium'
         ]
         read_only_fields = ['owner', 'created']
 
@@ -38,6 +40,7 @@ class SubjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subject
         fields = ['id', 'title', 'slug', 'image', 'courses', 'course_count']
+
 
     def get_course_count(self, obj):
         return obj.courses.count()
