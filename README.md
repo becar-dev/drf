@@ -1,4 +1,3 @@
-
 # 📘 Django REST API for Subjects, Courses & Comments
 
 Bu loyiha **Django** va **Django REST Framework** asosida yaratilgan bo‘lib, quyidagi modellarni boshqarish imkonini beradi:
@@ -47,11 +46,31 @@ Bu loyiha **Django** va **Django REST Framework** asosida yaratilgan bo‘lib, q
 
 ---
 
+## 🛡️ Permission Tizimi (Yangi)
+
+### 🔐 CompositePermission orqali xavfsizlik
+
+Quyidagi qat’iy ruxsatlar joriy etildi:
+
+| Nomi | Tavsif |
+|------|--------|
+| `IsEvenYear` | Faqat **juft yillarda** (2024, 2026, ...) ruxsat |
+| `IsSuperUserOnly` | Faqat `is_superuser=True` foydalanuvchilarga ruxsat |
+| `OnlyPutPatchAllowed` | Faqat `PUT` va `PATCH` methodlariga ruxsat |
+| `AdminPremiumCourseAccess` | Premium kurslarga faqat `admin` kirishi mumkin |
+
+Ushbu permissionlar `utils/permission.py` ichida `CompositePermission` sinfi orqali **markazlashtirilgan** va ixcham holatda boshqariladi.
+
+---
+
 ## 📊 Qo‘shimcha imkoniyatlar
 
 - Har bir `Course` obyektida `average_rating` (o‘rtacha baho) maydoni mavjud.
 - `Course` ro‘yxati avtomatik `average_rating` bo‘yicha kamayish tartibida chiqadi.
 - Har bir `Subject` uchun `course_count` (kurslar soni) va kurslar ro‘yxati mavjud.
+- **Premium kurslar** faqat `admin` foydalanuvchilarga ko‘rinadi (filter darajasida cheklangan).
+- Permission xatolari foydalanuvchiga **aniq va tushunarli message** bilan qaytadi.
+- Har bir permission mustaqil modulda joylashgan (`course/permission.py`), servis qatlamdan mustaqil.
 
 ---
 
@@ -66,20 +85,18 @@ python -m venv venv
 > Aktivlashtirish:
 
 - **Linux / Mac:**
-
   ```bash
   source venv/bin/activate
   ```
 
 - **Windows:**
-
   ```bash
   venv\Scripts\activate
   ```
 
 ---
 
-### 2️⃣ Kerakli kutubxonalarni o‘rnatish
+### 2️⃣ Kutubxonalarni o‘rnatish
 
 ```bash
 pip install -r requirements.txt
@@ -110,13 +127,14 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-> Endi siz `http://127.0.0.1:8000/api/` orqali API ni test qilishingiz mumkin.
+> API-ni tekshirish uchun:  
+👉 `http://127.0.0.1:8000/api/`
 
 ---
 
 ## 📦 Namuna ma'lumotlar
 
-### ➕ Yangi Subject yaratish
+### ➕ Yangi Subject
 
 ```json
 {
@@ -124,9 +142,7 @@ python manage.py runserver
 }
 ```
 
----
-
-### ➕ Yangi Course yaratish
+### ➕ Yangi Course
 
 ```json
 {
@@ -138,9 +154,7 @@ python manage.py runserver
 }
 ```
 
----
-
-### ➕ Yangi Comment yaratish
+### ➕ Yangi Comment
 
 ```json
 {
@@ -156,12 +170,17 @@ python manage.py runserver
 
 ## 🔍 Test qilish
 
-Postman, Insomnia yoki brauzer orqali quyidagi URL orqali test qilishingiz mumkin:
-
+Postman, Insomnia yoki browser orqali quyidagi URL orqali test qilishingiz mumkin:  
 👉 `http://127.0.0.1:8000/api/`
 
 ---
 
-## 👨‍💻 Beka_cr
+## 👨‍💻 Muallif
 
-Loyiha `Django` + `DRF` asosida o‘rgatish va test qilish maqsadida yaratilgan.
+**Beka_dev** — Django & DRF asosidagi REST API loyihasi.
+
+---
+
+## 📝 Litsenziya
+
+Ushbu loyiha faqat o‘quv va ichki test maqsadlarida foydalanish uchun mo‘ljallangan.
