@@ -1,10 +1,6 @@
 # 📘 Django REST API for Subjects, Courses & Comments
 
-Bu loyiha **Django** va **Django REST Framework** asosida yaratilgan bo‘lib, quyidagi modellarni boshqarish imkonini beradi:
-
-- `Subject` (Fanlar)
-- `Course` (Kurslar)
-- `Comment` (Izohlar / Reytinglar)
+Ushbu loyiha **Django** va **Django REST Framework** asosida yaratilgan bo‘lib, `Fanlar`, `Kurslar` va `Izohlar` bilan ishlovchi mustahkam RESTful API tizimini o‘z ichiga oladi.
 
 ---
 
@@ -14,11 +10,11 @@ Bu loyiha **Django** va **Django REST Framework** asosida yaratilgan bo‘lib, q
 
 | Method | URL | Tavsif |
 |--------|-----|--------|
-| `GET` | `/api/subjects/` | Barcha subjectlarni ro'yxatini ko'rsatadi (`course_count` va kurslar bilan) |
-| `GET` | `/api/subjects/<id>/` | Bitta subject tafsilotlarini ko'rsatadi |
-| `POST` | `/api/subjects/` | Yangi subject yaratadi |
-| `PUT` / `PATCH` | `/api/subjects/<id>/` | Subjectni o'zgartiradi |
-| `DELETE` | `/api/subjects/<id>/` | Subjectni o'chiradi |
+| `GET` | `/api/subjects/` | Barcha fanlar ro‘yxati (`course_count` va kurslar bilan) |
+| `GET` | `/api/subjects/<id>/` | Bitta fanga oid ma’lumot |
+| `POST` | `/api/subjects/` | Yangi fan yaratish |
+| `PUT` / `PATCH` | `/api/subjects/<id>/` | Fan ma’lumotini o‘zgartirish |
+| `DELETE` | `/api/subjects/<id>/` | Fan ma’lumotini o‘chirish |
 
 ---
 
@@ -26,11 +22,11 @@ Bu loyiha **Django** va **Django REST Framework** asosida yaratilgan bo‘lib, q
 
 | Method | URL | Tavsif |
 |--------|-----|--------|
-| `GET` | `/api/courses/` | Barcha kurslarni `average_rating` bo‘yicha kamayish tartibida ko'rsatadi |
-| `GET` | `/api/courses/<id>/` | Bitta kurs tafsilotlarini ko'rsatadi |
-| `POST` | `/api/courses/` | Yangi kurs yaratadi |
-| `PUT` / `PATCH` | `/api/courses/<id>/` | Kursni o'zgartiradi |
-| `DELETE` | `/api/courses/<id>/` | Kursni o'chiradi |
+| `GET` | `/api/courses/` | Kurslar ro‘yxati `average_rating` bo‘yicha kamayish tartibida |
+| `GET` | `/api/courses/<id>/` | Bitta kurs tafsilotlari |
+| `POST` | `/api/courses/` | Yangi kurs yaratish |
+| `PUT` / `PATCH` | `/api/courses/<id>/` | Kursni yangilash |
+| `DELETE` | `/api/courses/<id>/` | Kursni o‘chirish |
 
 ---
 
@@ -38,43 +34,66 @@ Bu loyiha **Django** va **Django REST Framework** asosida yaratilgan bo‘lib, q
 
 | Method | URL | Tavsif |
 |--------|-----|--------|
-| `GET` | `/api/comments/` | Barcha izohlarni ko'rsatadi |
-| `POST` | `/api/comments/` | Kursga yangi izoh va reyting qo'shadi |
-| `GET` | `/api/comments/<id>/` | Izoh tafsilotlarini ko'rsatadi |
-| `PUT` / `PATCH` | `/api/comments/<id>/` | Izohni o'zgartiradi |
-| `DELETE` | `/api/comments/<id>/` | Izohni o'chiradi |
+| `GET` | `/api/comments/` | Barcha izohlar ro‘yxati |
+| `POST` | `/api/comments/` | Yangi izoh va reyting qo‘shish |
+| `GET` | `/api/comments/<id>/` | Izoh tafsilotlari |
+| `PUT` / `PATCH` | `/api/comments/<id>/` | Izohni o‘zgartirish |
+| `DELETE` | `/api/comments/<id>/` | Izohni o‘chirish |
 
 ---
 
-## 🛡️ Permission Tizimi (Yangi)
+## 🔐 Autentifikatsiya
 
-### 🔐 CompositePermission orqali xavfsizlik
+### 🧾 TokenAuth yordamida
 
-Quyidagi qat’iy ruxsatlar joriy etildi:
+| Method | URL | Tavsif |
+|--------|-----|--------|
+| `POST` | `/api/register/` | Yangi foydalanuvchi ro‘yxatdan o‘tadi |
+| `POST` | `/api/login/` | Token orqali tizimga kirish (`username`, `password`) |
+| `POST` | `/api/logout/` | Tizimdan chiqish (token o‘chiriladi) |
 
-| Nomi | Tavsif |
-|------|--------|
+**Token yuborish formati:**
+
+```
+Authorization: Token <sizning_token>
+```
+
+---
+
+## 🧠 Permission Tizimi (Custom)
+
+| Permission nomi | Tavsif |
+|-----------------|--------|
 | `IsEvenYear` | Faqat **juft yillarda** (2024, 2026, ...) ruxsat |
-| `IsSuperUserOnly` | Faqat `is_superuser=True` foydalanuvchilarga ruxsat |
-| `OnlyPutPatchAllowed` | Faqat `PUT` va `PATCH` methodlariga ruxsat |
-| `AdminPremiumCourseAccess` | Premium kurslarga faqat `admin` kirishi mumkin |
-
-Ushbu permissionlar `utils/permission.py` ichida `CompositePermission` sinfi orqali **markazlashtirilgan** va ixcham holatda boshqariladi.
+| `IsSuperUserOnly` | Faqat `superuser` lar uchun ruxsat |
+| `OnlyPutPatchAllowed` | Faqat `PUT` va `PATCH` methodlari ruxsat etiladi |
+| `AdminPremiumCourseAccess` | `is_premium=True` kurslar faqat `admin` foydalanuvchilarga ko‘rinadi |
 
 ---
 
-## 📊 Qo‘shimcha imkoniyatlar
+## 📊 Qo‘shimcha Imkoniyatlar
 
-- Har bir `Course` obyektida `average_rating` (o‘rtacha baho) maydoni mavjud.
-- `Course` ro‘yxati avtomatik `average_rating` bo‘yicha kamayish tartibida chiqadi.
-- Har bir `Subject` uchun `course_count` (kurslar soni) va kurslar ro‘yxati mavjud.
-- **Premium kurslar** faqat `admin` foydalanuvchilarga ko‘rinadi (filter darajasida cheklangan).
-- Permission xatolari foydalanuvchiga **aniq va tushunarli message** bilan qaytadi.
-- Har bir permission mustaqil modulda joylashgan (`course/permission.py`), servis qatlamdan mustaqil.
+- Har bir `Course` obyektida `average_rating` maydoni mavjud
+- `Course` ro‘yxati reyting bo‘yicha tartiblangan
+- Har bir `Subject`:
+  - `courses` ro‘yxatini
+  - `course_count` qiymatini oladi
+- Premium kurslar oddiy foydalanuvchilardan yashirilgan
+- Har bir permission aniq xatolik xabari bilan qaytadi
+- Barcha permissionlar `course/permission.py` faylida modullar orqali boshqariladi
 
 ---
 
-## ⚙️ Ishga tushirish
+## 📘 Swagger API Dokumentatsiyasi
+
+**URL:** [`/swagger/`](http://127.0.0.1:8000/swagger/)
+
+- Swagger orqali to‘g‘ridan-to‘g‘ri API test qilish mumkin
+- `Token` yoki `Bearer` orqali `Authorize` qilish qo‘llab-quvvatlanadi
+
+---
+
+## ⚙️ O‘rnatish
 
 ### 1️⃣ Virtual environment yaratish
 
@@ -82,19 +101,10 @@ Ushbu permissionlar `utils/permission.py` ichida `CompositePermission` sinfi orq
 python -m venv venv
 ```
 
-> Aktivlashtirish:
+> Faollashtirish:
 
-- **Linux / Mac:**
-  ```bash
-  source venv/bin/activate
-  ```
-
-- **Windows:**
-  ```bash
-  venv\Scripts\activate
-  ```
-
----
+- **Windows:** `venv\Scripts\activate`
+- **Linux/macOS:** `source venv/bin/activate`
 
 ### 2️⃣ Kutubxonalarni o‘rnatish
 
@@ -102,24 +112,18 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
----
-
-### 3️⃣ Ma'lumotlar bazasini tayyorlash
+### 3️⃣ Ma’lumotlar bazasini sozlash
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
----
-
-### 4️⃣ Superuser yaratish (ixtiyoriy)
+### 4️⃣ Superuser yaratish (admin panel uchun)
 
 ```bash
 python manage.py createsuperuser
 ```
-
----
 
 ### 5️⃣ Serverni ishga tushirish
 
@@ -127,12 +131,11 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-> API-ni tekshirish uchun:  
-👉 `http://127.0.0.1:8000/api/`
+👉 [http://127.0.0.1:8000/swagger/](http://127.0.0.1:8000/swagger/)
 
 ---
 
-## 📦 Namuna ma'lumotlar
+## 🧪 Test Ma'lumotlari
 
 ### ➕ Yangi Subject
 
@@ -168,19 +171,13 @@ python manage.py runserver
 
 ---
 
-## 🔍 Test qilish
-
-Postman, Insomnia yoki browser orqali quyidagi URL orqali test qilishingiz mumkin:  
-👉 `http://127.0.0.1:8000/api/`
-
----
-
 ## 👨‍💻 Muallif
 
-**Beka_dev** — Django & DRF asosidagi REST API loyihasi.
+**Beka_dev**  
+
 
 ---
 
 ## 📝 Litsenziya
 
-Ushbu loyiha faqat o‘quv va ichki test maqsadlarida foydalanish uchun mo‘ljallangan.
+Ushbu loyiha faqat o‘quv va ichki test maqsadlarida foydalanish uchun mo‘ljallangan. Tijorat maqsadlarida foydalanish uchun muallif ruxsati talab qilinadi.
