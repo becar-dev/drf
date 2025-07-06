@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rsa.prime import is_prime
-
+from django.contrib.auth.models import User
 from .models import Subject, Course, Comment
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -44,3 +44,17 @@ class SubjectSerializer(serializers.ModelSerializer):
 
     def get_course_count(self, obj):
         return obj.courses.count()
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password']
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password']
+        )
+        return user
