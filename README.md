@@ -4,6 +4,16 @@ Ushbu loyiha **Django** va **Django REST Framework** asosida yaratilgan bo‘lib
 
 ---
 
+## 🛠️ Texnologiyalar Steki
+
+- **Backend:** Django, Django REST Framework
+- **Ma'lumotlar bazasi:** PostgreSQL (yoki SQLite3)
+- **Autentifikatsiya:** Simple JWT (JSON Web Tokens), TokenAuthentication
+- **API Dokumentatsiya:** drf-yasg (Swagger)
+- **Kod formati:** Black, isort
+
+---
+
 ## 🚀 API Imkoniyatlari
 
 ### 📚 Subject API
@@ -44,13 +54,24 @@ Ushbu loyiha **Django** va **Django REST Framework** asosida yaratilgan bo‘lib
 
 ## 🔐 Autentifikatsiya
 
-### 🧾 TokenAuth yordamida
+API bir nechta autentifikatsiya usulini qo'llab-quvvatlaydi. 
+So'rov yuborayotganda,`Authorization` sarlavhasini to'g'ri formatda yuborish kerak.
 
-| Method | URL | Tavsif |
-|--------|-----|--------|
-| `POST` | `/api/register/` | Yangi foydalanuvchi ro‘yxatdan o‘tadi |
-| `POST` | `/api/login/` | Token orqali tizimga kirish (`username`, `password`) |
-| `POST` | `/api/logout/` | Tizimdan chiqish (token o‘chiriladi) |
+
+| Usul | Sarlavha Formati | Izoh |
+| :--- | :--- | :--- |
+| **JWT** | `Authorization: Bearer <access_token>` | Eng tavsiya etilgan usul. |
+| **Token** | `Authorization: Token <token>` | Oddiy servislar uchun. |
+| **Basic** | `Authorization: Basic <base64_encoded>` | Faqat test uchun. |
+
+### 🧾 Endpointlar
+
+| Method | URL | Tavsif | `auth_type` parametri |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/register/` | Yangi foydalanuvchi ro‘yxatdan o‘tadi | `jwt`, `token`, `session` |
+| `POST` | `/api/login/` | Tizimga kirish | `jwt`, `token`, `session` |
+| `POST` | `/api/logout/` | Tizimdan chiqish | `jwt`, `token`, `session` |
+| `POST` | `/api/token/refresh/` | `refresh` token orqali yangi `access` token olish | - |
 
 **Token yuborish formati:**
 
