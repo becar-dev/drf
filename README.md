@@ -175,7 +175,6 @@ python manage.py runserver
 
 **Beka_dev**  
 
-
 ---
 
 ## 📝 Litsenziya

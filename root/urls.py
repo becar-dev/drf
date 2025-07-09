@@ -1,34 +1,34 @@
 # n63_course/urls.py
+
 from django.contrib import admin
 from django.urls import path, include
-from course.views import RegisterView, LogoutView
-from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from rest_framework import permissions
+# Bu custom generatorni ishlatishda davom etishingiz mumkin
 from course.utils.swagger import JWTSchemaGenerator
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 schema_view = get_schema_view(
     openapi.Info(
         title="API Documentation",
         default_version='v1',
-        description="TokenAuth bilan CRUD API",
+        description="Token, JWT va Session Auth bilan CRUD API",
     ),
     public=True,
-    permission_classes=(permissions.AllowAny,),
+    permission_classes=[permissions.AllowAny],
     generator_class=JWTSchemaGenerator
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # Barcha API yo'llari endi 'course' ilovasiga yo'naltiriladi
     path('api/', include('course.urls')),
-
-    path('api/login/', obtain_auth_token),
-    path('api/register/', RegisterView.as_view()),
-    path('api/logout/', LogoutView.as_view()),
-
+    # Swagger uchun yo'l
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
+if settings.DEBUG:
 
-
-
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

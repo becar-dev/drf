@@ -45,16 +45,79 @@ class SubjectSerializer(serializers.ModelSerializer):
     def get_course_count(self, obj):
         return obj.courses.count()
 
+
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    """
+    Foydalanuvchini ro'yxatdan o'tkazish uchun serializer.
+    Parolni tasdiqlash uchun `password2` maydoni qo'shilgan.
+    """
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'},
+        help_text="Foydalanuvchi paroli"
+    )
+    password2 = serializers.CharField(
+        write_only=True,
+        required=True,
+        label='Parolni tasdiqlang',
+        style={'input_type': 'password'}
+    )
 
     class Meta:
         model = User
-        fields = ['username', 'password']
+        fields = ('username', 'password', 'password2')
+        extra_kwargs = {
+            'username': {'help_text': 'Noyob foydalanuvchi nomi (username)'},
+        }
+
+    def validate(self, attrs):
+        """
+        Ikkala parolning bir-biriga mosligini tekshiradi.
+        """
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Parollar bir-biriga mos kelmadi."})
+        return attrs
 
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            password=validated_data['password']
+        """
+        Validatsiyadan o'tgan ma'lumotlar asosida yangi foydalanuvchi yaratadi.
+        Parol xeshlanadi (hashed).
+        """
+        # `password2` maydonini `validated_data`dan olib tashlaymiz,
+        # chunki u `User` modelida mavjud emas.
+        validated_data.pop('password2')
+
+        user = User.objects.create(
+            username=validated_data['username']
         )
+
+        # Parolni shifrlab (set_password) saqlaymiz.
+        user.set_password(validated_data['password'])
+        user.save()
+
         return user
+
+
+# ----------------------------------------------------------------
+
+class LoginSerializer(serializers.Serializer):
+    """
+    Tizimga kirish uchun `username` va `password`ni qabul qiluvchi serializer.
+    Bu serializer modelga bog'lanmagan.
+    """
+    username = serializers.CharField(required=True)
+    password = serializers.CharField(
+        required=True,
+        write_only=True,  # Parol javobda qaytarilmasligi uchun
+        style={'input_type': 'password'}
+    )
+
+
+# ----------------------------------------------------------------
+
+class LogoutJWTSerializer(serializers.Serializer):
+    """
+    JWT orqali tizimdan chiqish uchun `refresh` tokenini qabul qiluvchi serializer.
+    """
+    refresh = serializers.CharField(help_text="JWT bilan tizimdan chiqish uchun refresh token")
