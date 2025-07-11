@@ -1,229 +1,233 @@
-<div align="center">
-<h1 align="center">📘 Django REST API for Educational Platform</h1>
-<p align="center">
-A high-performance, scalable, and secure RESTful API for managing subjects, courses, and user interactions.
-<br />
-<a href="#-api-dokumentatsiyasi-swagger"><strong>API Hujjatlarini ko'rish »</strong></a>
-·
-<a href="https://www.google.com/search?q=https://github.com/your-username/your-repo/issues">Xatolik haqida xabar berish</a>
-·
-<a href="https://www.google.com/search?q=https://github.com/your-username/your-repo/pulls">Yangi imkoniyat taklif qilish</a>
-</p>
-</div>
+# 📘 Django REST API for Subjects, Courses & Comments
 
-<div align="center">
+Ushbu loyiha **Django** va **Django REST Framework** asosida yaratilgan bo‘lib, `Fanlar`, `Kurslar` va `Izohlar` bilan ishlovchi mustahkam RESTful API tizimini o‘z ichiga oladi.
 
-</div>
+---
 
-<details open>
-<summary><h2>Mundarija</h2></summary>
-<ol>
-<li><a href="#-loyiha-haqida">Loyiha haqida</a></li>
-<li><a href="#-texnologiyalar-steki">Texnologiyalar Steki</a></li>
-<li><a href="#-arxitektura-va-optimizatsiya">Arxitektura va Optimizatsiya</a></li>
-<li><a href="#-api-endpointlar">API Endpointlar</a></li>
-<li><a href="#-oʻrnatish-va-ishga-tushirish">Oʻrnatish va Ishga Tushirish</a></li>
-<li><a href="#-infografika">Infografika</a></li>
-<li><a href="#-muallif">Muallif</a></li>
-<li><a href="#-litsenziya">Litsenziya</a></li>
-</ol>
-</details>
+## 🛠️ Texnologiyalar Steki
 
-🎯 Loyiha haqida
-Ushbu loyiha Fanlar, Kurslar va Izohlar kabi o'quv platformasining asosiy komponentlarini boshqarish uchun mo'ljallangan yuqori unumdorlikka ega RESTful API tizimidir. Tizim kengaytiriluvchanlik (scalability), xavfsizlik va tezkorlikni birinchi o'ringa qo'yadi.
+- **Backend:** Django, Django REST Framework
+- **Ma'lumotlar bazasi:** PostgreSQL (yoki SQLite3)
+- **Autentifikatsiya:** Simple JWT (JSON Web Tokens), TokenAuthentication
+- **API Dokumentatsiya:** drf-yasg (Swagger)
+- **Kod formati:** Black, isort
 
-Asosiy yutuqlar:
+---
 
-N+1 muammosi to'liq hal qilingan: Ma'lumotlar bazasiga so'rovlar soni prefetch_related, select_related va annotate orqali minimallashtirilgan.
+## 🚀 API Imkoniyatlari
 
-Pagination: Katta hajmdagi ma'lumotlar to'plamlari sahifalarga bo'lib uzatiladi, bu esa API javob vaqtini keskin qisqartiradi.
+* **Dinamik Reyting:** Har bir `Course` obyekti uchun o'rtacha reyting (`average_rating`) izohlar asosida avtomatik hisoblanadi va kurslar ro'yxati ushbu reyting bo'yicha tartiblanadi.
 
-Moslashuvchan autentifikatsiya: JWT, Token va Session kabi bir nechta autentifikatsiya usullarini qo'llab-quvvatlaydi.
+* **Dinamik Hisoblagichlar:** Har bir `Subject` uchun unga tegishli kurslar soni (`course_count`) alohida so'rovlarsiz, `annotate` yordamida samarali hisoblanadi.
 
-🛠️ Texnologiyalar Steki
-Kategoriya
+* **Premium Kontent Boshqaruvi:** `is_premium` belgisi orqali kurslarni pullik yoki bepul deb belgilash va oddiy foydalanuvchilardan yashirish imkoniyati mavjud.
 
-Texnologiya
+* **Moslashuvchan Ruxsatnomalar (Permissions):** Loyihada biznes mantiqqa asoslangan maxsus ruxsatnomalar tizimi mavjud (`IsEvenYear`, `IsSuperUserOnly`, `AdminPremiumCourseAccess`).
 
-Izoh
+* **To'liq CRUD:** Asosiy modellar (`Subject`, `Course`, `Comment`, `Module`) uchun barcha yaratish, o'qish, yangilash va o'chirish amallari to'liq qo'llab-quvvatlanadi.
 
-Backend
 
-Django, Django REST Framework
+### 📚 Subject API
 
-Asosiy framework va API yaratish uchun kutubxona.
+| Method | URL | Tavsif |
+|--------|-----|--------|
+| `GET` | `/api/subjects/` | Barcha fanlar ro‘yxati (`course_count` va kurslar bilan) |
+| `GET` | `/api/subjects/<id>/` | Bitta fanga oid ma’lumot |
+| `POST` | `/api/subjects/` | Yangi fan yaratish |
+| `PUT` / `PATCH` | `/api/subjects/<id>/` | Fan ma’lumotini o‘zgartirish |
+| `DELETE` | `/api/subjects/<id>/` | Fan ma’lumotini o‘chirish |
 
-Ma'lumotlar bazasi
+---
 
-PostgreSQL / SQLite3
+### 🎓 Course API
 
-Ishlab chiqarish (production) uchun PostgreSQL tavsiya etiladi.
+| Method | URL | Tavsif |
+|--------|-----|--------|
+| `GET` | `/api/courses/` | Kurslar ro‘yxati `average_rating` bo‘yicha kamayish tartibida |
+| `GET` | `/api/courses/<id>/` | Bitta kurs tafsilotlari |
+| `POST` | `/api/courses/` | Yangi kurs yaratish |
+| `PUT` / `PATCH` | `/api/courses/<id>/` | Kursni yangilash |
+| `DELETE` | `/api/courses/<id>/` | Kursni o‘chirish |
 
-Autentifikatsiya
+---
 
-Simple JWT, TokenAuthentication
+### 💬 Comment API
 
-Xavfsiz va zamonaviy autentifikatsiya mexanizmlari.
+| Method | URL | Tavsif |
+|--------|-----|--------|
+| `GET` | `/api/comments/` | Barcha izohlar ro‘yxati |
+| `POST` | `/api/comments/` | Yangi izoh va reyting qo‘shish |
+| `GET` | `/api/comments/<id>/` | Izoh tafsilotlari |
+| `PUT` / `PATCH` | `/api/comments/<id>/` | Izohni o‘zgartirish |
+| `DELETE` | `/api/comments/<id>/` | Izohni o‘chirish |
 
-API Dokumentatsiya
+---
 
-drf-yasg (Swagger UI)
+## 🔐 Autentifikatsiya
 
-Interaktiv API hujjatlari va testlash uchun.
+API bir nechta autentifikatsiya usulini qo'llab-quvvatlaydi. 
+So'rov yuborayotganda,`Authorization` sarlavhasini to'g'ri formatda yuborish kerak.
 
-Development & Test
 
-Django Debug Toolbar
+| Usul | Sarlavha Formati | Izoh |
+| :--- | :--- | :--- |
+| **JWT** | `Authorization: Bearer <access_token>` | Eng tavsiya etilgan usul. |
+| **Token** | `Authorization: Token <token>` | Oddiy servislar uchun. |
+| **Basic** | `Authorization: Basic <base64_encoded>` | Faqat test uchun. |
 
-API ishlashini tahlil qilish va optimallashtirish uchun.
+### 🧾 Endpointlar
 
-Asinxron vazifalar
+| Method | URL | Tavsif | `auth_type` parametri |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/register/` | Yangi foydalanuvchi ro‘yxatdan o‘tadi | `jwt`, `token`, `session` |
+| `POST` | `/api/login/` | Tizimga kirish | `jwt`, `token`, `session` |
+| `POST` | `/api/logout/` | Tizimdan chiqish | `jwt`, `token`, `session` |
+| `POST` | `/api/token/refresh/` | `refresh` token orqali yangi `access` token olish | - |
 
-Celery, Redis (Ixtiyoriy)
+**Token yuborish formati:**
 
-Katta hajmli vazifalarni fonda bajarish uchun.
+```
+Authorization: Token <sizning_token>
+```
 
-🏗️ Arxitektura va Optimizatsiya
-Loyiha arxitekturasi DRY (Don't Repeat Yourself) va KISS (Keep It Simple, Stupid) tamoyillariga asoslangan.
+---
 
-ViewSet va Routerlar: Kodni tartibli saqlash va standart CRUD operatsiyalarini osonlashtirish uchun viewsets.ModelViewSet va DefaultRouterdan foydalanilgan.
+## 🧠 Permission Tizimi (Custom)
 
-Serialayzerlarni ixtisoslashtirish: List va Detail amallari uchun alohida serialayzerlar (CourseListSerializer, CourseDetailSerializer) ishlatilgan. Bu keraksiz ma'lumotlarni uzatishni oldini oladi.
+| Permission nomi | Tavsif |
+|-----------------|--------|
+| `IsEvenYear` | Faqat **juft yillarda** (2024, 2026, ...) ruxsat |
+| `IsSuperUserOnly` | Faqat `superuser` lar uchun ruxsat |
+| `OnlyPutPatchAllowed` | Faqat `PUT` va `PATCH` methodlari ruxsat etiladi |
+| `AdminPremiumCourseAccess` | `is_premium=True` kurslar faqat `admin` foydalanuvchilarga ko‘rinadi |
 
-Maxsus Permissionlar: course/permission.py faylida biznes mantiqqa asoslangan maxsus ruxsatnomalar (IsEvenYear, IsSuperUserOnly) yaratilgan.
+---
 
-🔗 API Endpointlar
-Barcha endpointlar /api/ prefiksi bilan boshlanadi.
+## 🏗️ Arxitektura va Optimizatsiya Yutuqlari
 
-<details>
-<summary><strong>Autentifikatsiya Endpointlari (/api/auth/...)</strong></summary>
+Loyiha arxitekturasi `DRY (Don't Repeat Yourself)` tamoyiliga asoslangan bo'lib, unumdorlik va kengaytiriluvchanlikka alohida e'tibor qaratilgan.
 
-Method
+* **Samarali Ma'lumotlar Bazasi So'rovlari:**
+  "N+1" muammosi `prefetch_related`, `select_related` va `annotate` kabi Django ORM usullari orqali to'liq bartaraf etilgan. Bu API'ning katta yuklamalarda ham tez ishlashini ta'minlaydi.
 
-URL
+* **Katta Hajmdagi Ma'lumotlarni Boshqarish (Pagination):**
+  API javoblari sahifalarga bo'lib uzatiladi, bu esa minglab yozuvlar mavjud bo'lganda ham tezkor javob vaqtini kafolatlaydi va serverga tushadigan yuklamani kamaytiradi.
 
-Tavsif
+* **Toza va Kengaytiriluvchan Kod Tuzilmasi:**
+  Kod `viewsets.ModelViewSet` va `DefaultRouter` yordamida tartibli saqlanadi. `List` va `Detail` amallari uchun alohida serialayzerlardan foydalanish keraksiz ma'lumotlarni uzatishning oldini oladi.
 
-POST
+* **Professional Rivojlantirish Muhiti:**
+  Loyiha `Django Debug Toolbar` bilan jihozlangan bo'lib, bu API'ning ishlash tezligini va SQL so'rovlar sonini real vaqtda tahlil qilish imkonini beradi. Shuningdek, `populate_db.py` skripti orqali optimizatsiya samarasini real sharoitda tekshirish mumkin.
 
-auth/register/
 
-Yangi foydalanuvchini ro‘yxatdan o‘tkazish.
+---
 
-POST
+## 📊 Qo‘shimcha Imkoniyatlar
 
-auth/login/
+- Har bir `Course` obyektida `average_rating` maydoni mavjud
+- `Course` ro‘yxati reyting bo‘yicha tartiblangan
+- Har bir `Subject`:
+  - `courses` ro‘yxatini
+  - `course_count` qiymatini oladi
+- Premium kurslar oddiy foydalanuvchilardan yashirilgan
+- Har bir permission aniq xatolik xabari bilan qaytadi
+- Barcha permissionlar `course/permission.py` faylida modullar orqali boshqariladi
 
-Tizimga kirish va token olish.
+---
 
-POST
+## 📘 Swagger API Dokumentatsiyasi
 
-auth/logout/
+**URL:** [`/swagger/`](http://127.0.0.1:8000/swagger/)
 
-Tizimdan chiqish (JWT tokenini qora ro'yxatga kiritish).
+- Swagger orqali to‘g‘ridan-to‘g‘ri API test qilish mumkin
+- `Token` yoki `Bearer` orqali `Authorize` qilish qo‘llab-quvvatlanadi
 
-POST
+---
 
-auth/token/refresh/
+## ⚙️ O‘rnatish
 
-refresh token orqali yangi access token olish.
+### 1️⃣ Virtual environment yaratish
 
-</details>
-
-<details>
-<summary><strong>Asosiy resurslar (/api/...)</strong></summary>
-
-Resurs
-
-URL
-
-Qo'llab-quvvatlanadigan metodlar
-
-Subjects
-
-subjects/
-
-GET, POST, PUT, PATCH, DELETE
-
-Courses
-
-courses/
-
-GET, POST, PUT, PATCH, DELETE
-
-Modules
-
-modules/
-
-GET, POST, PUT, PATCH, DELETE
-
-Comments
-
-comments/
-
-GET, POST, PUT, PATCH, DELETE
-
-</details>
-
-🚀 Oʻrnatish va Ishga Tushirish
-Loyiha bilan ishlashni boshlash uchun quyidagi qadamlarni bajaring.
-
-1. Talablar
-Python 3.8+
-
-PostgreSQL (tavsiya etiladi) yoki SQLite3
-
-Git
-
-2. O'rnatish
-# 1. Repozitoriyni klonlash
-git clone [https://github.com/your-username/your-repo.git](https://github.com/your-username/your-repo.git)
-cd your-repo
-
-# 2. Virtual muhit yaratish va faollashtirish
+```bash
 python -m venv venv
-source venv/bin/activate  # Linux/macOS
-# venv\Scripts\activate  # Windows
+```
 
-# 3. Kerakli kutubxonalarni o'rnatish
+> Faollashtirish:
+
+- **Windows:** `venv\Scripts\activate`
+- **Linux/macOS:** `source venv/bin/activate`
+
+### 2️⃣ Kutubxonalarni o‘rnatish
+
+```bash
 pip install -r requirements.txt
+```
 
-# 4. .env faylini sozlash (agar mavjud bo'lsa)
-# .env.example faylidan nusxa oling va kerakli o'zgaruvchilarni kiriting
+### 3️⃣ Ma’lumotlar bazasini sozlash
 
-# 5. Ma'lumotlar bazasi migratsiyalarini qo'llash
+```bash
+python manage.py makemigrations
 python manage.py migrate
+```
 
-# 6. Superuser yaratish
+### 4️⃣ Superuser yaratish (admin panel uchun)
+
+```bash
 python manage.py createsuperuser
+```
 
-3. Ishga tushirish
-# Development serverni ishga tushirish
+### 5️⃣ Serverni ishga tushirish
+
+```bash
 python manage.py runserver
+```
 
-Endi loyiha http://127.0.0.1:8000/ manzilida ishlaydi.
+👉 [http://127.0.0.1:8000/swagger/](http://127.0.0.1:8000/swagger/)
 
-4. API Dokumentatsiyasi (Swagger)
-API bilan tanishish va uni test qilish uchun quyidagi manzilga o'ting:
+---
 
-Swagger UI: http://127.0.0.1:8000/swagger/
+## 🧪 Test Ma'lumotlari
 
-📊 Infografika
-<div align="center">
-<h2>
-<a href="link-to-your-infographic.html">
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/SOON...-Click%2520to%2520view%2520interactive%2520infographic-blue%3Fstyle%3Dfor-the-badge%26logo%3Ddata:image/svg%2Bxml%3Bbase64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAyQzYuNDg2IDIgMiA2LjQ4NiAyIDEyczQuNDg2IDEwIDEwIDEwIDEwLTQuNDg2IDEwLTEwUzE3LjUxNCAyIDEyIDJ6bTAgMThjLTQuNDEgMC04LTMuNTktOC04czMuNTktOCA4IDggOCAzLjU5IDggOC0zLjU5IDgtOCA4eiIvPjxwYXRoIGQ9Ik0xMSAxNmgydjJoLTJ6bTAtOGgydjZoLTJ6Ii8%2BPC9zdmc+" alt="SOON..."/>
-</a>
-</h2>
-<p>Loyiha arxitekturasi, optimizatsiya yutuqlari va asosiy ko'rsatkichlarni namoyish etuvchi interaktiv infografika tez orada tayyor bo'ladi.</p>
-</div>
+### ➕ Yangi Subject
 
-👨‍💻 Muallif
-Beka_dev
+```json
+{
+  "title": "Backend Development"
+}
+```
 
-GitHub: @your-username
+### ➕ Yangi Course
 
-Telegram: @your-telegram
+```json
+{
+  "title": "Django Rest Framework",
+  "overview": "Learn DRF",
+  "duration": "12:00:00",
+  "price": "99.99",
+  "subject_id": 1
+}
+```
 
-📝 Litsenziya
-Ushbu loyiha MIT litsenziyasi ostida tarqatiladi. Batafsil ma'lumot uchun LICENSE fayliga qarang.
+### ➕ Yangi Comment
+
+```json
+{
+  "topic": "Zo'r kurs!",
+  "content": "Men ko'p narsani o'rgandim.",
+  "rating": 5,
+  "course": 1,
+  "user": 2
+}
+```
+
+---
+
+## 👨‍💻 Muallif
+
+**Beka_dev**  
+
+---
+
+## 📝 Litsenziya
+
+Ushbu loyiha faqat o‘quv va ichki test maqsadlarida foydalanish uchun mo‘ljallangan. Tijorat maqsadlarida foydalanish uchun muallif ruxsati talab qilinadi.
