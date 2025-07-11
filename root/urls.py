@@ -29,6 +29,11 @@ urlpatterns = [
     # Swagger uchun yo'l
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
+# TUZATISH: DEBUG rejimi uchun barcha URL'lar bitta blokda jamlandi
 if settings.DEBUG:
+    # Debug Toolbar uchun yo'l
+    urlpatterns += [path('__debug__/', include('debug_toolbar.urls'))]
 
+    # Static va Media fayllarni serve qilish uchun yo'llar
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

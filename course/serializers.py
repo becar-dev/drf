@@ -1,50 +1,99 @@
 from rest_framework import serializers
-from rsa.prime import is_prime
 from django.contrib.auth.models import User
-from .models import Subject, Course, Comment
+from .models import Subject, Course, Module, Comment
+
+# ===============================================================
+# 1. ASOSIY MODELLAR UCHUN SERIALIZERLAR (OPTIMIZED)
+# ===============================================================
 
 class CommentSerializer(serializers.ModelSerializer):
+    """
+    Izohlar uchun serializer. Foydalanuvchi nomini ham qo'shib ko'rsatadi.
+    """
+    owner = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ['id', 'owner', 'course', 'rating', 'created_at']
 
-class CourseSerializer(serializers.ModelSerializer):
+
+class ModuleSerializer(serializers.ModelSerializer):
+    """
+    Modullar uchun serializer.
+    """
+    class Meta:
+        model = Module
+        fields = ['id', 'title', 'course']
+
+
+class CourseListSerializer(serializers.ModelSerializer):
+    """
+    KATTA OPTIMIZATSIYA: Kurslar ro'yxati (/api/courses/) uchun yengil serializer.
+    Bu faqat asosiy va annotatsiya qilingan ma'lumotlarni ko'rsatadi.
+    """
+    # View'da annotate() orqali qo'shilgan maydonlar
+    average_rating = serializers.FloatField(read_only=True, default=0)
+    modules_count = serializers.IntegerField(read_only=True, default=0)
+    comments_count = serializers.IntegerField(read_only=True, default=0)
     subject_title = serializers.CharField(source='subject.title', read_only=True)
-    subject_id = serializers.PrimaryKeyRelatedField(
-        queryset=Subject.objects.all(),
-        source='subject',
-        write_only=True
-    )
-    average_rating = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Course
         fields = [
-            'id', 'title', 'overview', 'duration', 'price',
-            'owner', 'image', 'subject_id', 'subject_title',
-            'created', 'average_rating', 'is_premium'
+            'id', 'title', 'image', 'is_premium', 'price',
+            'subject_title', 'average_rating', 'modules_count', 'comments_count'
         ]
-        read_only_fields = ['owner', 'created']
 
 
+class CourseDetailSerializer(serializers.ModelSerializer):
+    """
+    KATTA OPTIMIZATSIYA: Bitta kurs haqida to'liq ma'lumot (/api/courses/1/) uchun serializer.
+    View'da prefetch_related() ishlatilgani uchun bu maydonlar qo'shimcha so'rov yubormaydi.
+    """
+    # Nested serializers for related models
+    modules = ModuleSerializer(many=True, read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
 
-class CourseInlineSerializer(serializers.ModelSerializer):
+    # Annotate qilingan maydonlar
+    average_rating = serializers.FloatField(read_only=True, default=0)
+
+    # Yozish uchun alohida, o'qish uchun alohida maydonlar
+    # XATOLIK TUZATILDI: serializersPrimaryKeyRelatedField -> serializers.PrimaryKeyRelatedField
+    subject = serializers.PrimaryKeyRelatedField(
+        queryset=Subject.objects.all(), write_only=True
+    )
+    subject_title = serializers.CharField(source='subject.title', read_only=True)
+    owner = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
         model = Course
-        fields = ['id', 'title']
+        fields = [
+            'id', 'title', 'overview', 'duration', 'price', 'is_premium',
+            'owner', 'image', 'created', 'subject', 'subject_title',
+            'average_rating', 'modules', 'comments'
+        ]
+
 
 class SubjectSerializer(serializers.ModelSerializer):
-    courses = CourseInlineSerializer(many=True, read_only=True)
-    course_count = serializers.SerializerMethodField()
+    """
+    Fanlar uchun serializer.
+    """
+    # OPTIMIZATSIYA: `SerializerMethodField` o'rniga `IntegerField` ishlatildi.
+    # Bu `views.py` dagi `annotate(course_count=Count('courses'))` bilan birga ishlaydi.
+    course_count = serializers.IntegerField(read_only=True)
+
+    # `prefetch_related('courses')` bilan samarali ishlaydi.
+    # Kurslar ro'yxati uchun yengil serializer ishlatamiz.
+    courses = CourseListSerializer(many=True, read_only=True)
 
     class Meta:
         model = Subject
-        fields = ['id', 'title', 'slug', 'image', 'courses', 'course_count']
+        fields = ['id', 'title', 'slug', 'image', 'course_count', 'courses']
 
 
-    def get_course_count(self, obj):
-        return obj.courses.count()
-
+# ===============================================================
+# 2. AUTENTIFIKATSIYA UCHUN SERIALIZERLAR (O'zgarishsiz)
+# ===============================================================
 
 class RegisterSerializer(serializers.ModelSerializer):
     """
@@ -84,22 +133,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         Validatsiyadan o'tgan ma'lumotlar asosida yangi foydalanuvchi yaratadi.
         Parol xeshlanadi (hashed).
         """
-        # `password2` maydonini `validated_data`dan olib tashlaymiz,
-        # chunki u `User` modelida mavjud emas.
         validated_data.pop('password2')
-
-        user = User.objects.create(
-            username=validated_data['username']
-        )
-
-        # Parolni shifrlab (set_password) saqlaymiz.
-        user.set_password(validated_data['password'])
-        user.save()
-
+        user = User.objects.create_user(**validated_data)
         return user
 
-
-# ----------------------------------------------------------------
 
 class LoginSerializer(serializers.Serializer):
     """
@@ -109,12 +146,10 @@ class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     password = serializers.CharField(
         required=True,
-        write_only=True,  # Parol javobda qaytarilmasligi uchun
+        write_only=True,
         style={'input_type': 'password'}
     )
 
-
-# ----------------------------------------------------------------
 
 class LogoutJWTSerializer(serializers.Serializer):
     """
